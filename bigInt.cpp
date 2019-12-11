@@ -1,14 +1,16 @@
 #include "bigInt.h"
 #include <cstddef>
-#include<iostream>
+#include <iostream>
+#include <cassert>
 #include <limits>
 #include <stdexcept>
+#include <sstream>
 using namespace std;
 const size_t MaxSizeT = numeric_limits<size_t>::max();
-BigInt::BigInt(const std::string& s) 
+BigInt::BigInt(const string& s) 
 	: isNegative(false)
 {
-	size_t i = 0;
+	size_t i = 0;//    12
 	while(i < s.size() and isspace(s[i])) {
 		++i;
 	}
@@ -33,6 +35,24 @@ BigInt::BigInt(const std::string& s)
 	eraseleadingZeroes();
 
 }
+
+BigInt::BigInt(const int& n)
+	:isNegative(false)
+{
+	string s = to_string(n);
+	size_t i = 0;
+	if(s[i] == '-') {
+		isNegative = s[i] == '-';
+		++i;
+	}
+	while(i < s.size() and isdigit(s[i])) {
+		mDigits.push_back(s[i] - '0');
+		++i;
+	}
+}
+
+
+
 string BigInt::toStr() const 
 {
 	string r;
@@ -56,6 +76,10 @@ void BigInt::eraseleadingZeroes(){
 		mDigits.erase(mDigits.begin());
 	}
 }
+/*istream& operator >> (istream& in,  BigInt& x)
+{
+		
+}*/
 BigInt operator+ (const BigInt& x, const BigInt& y)
 {
 	if(x.isNegative == y.isNegative) {
@@ -101,6 +125,29 @@ BigInt operator- (const BigInt& x, const BigInt& y)
 	} throw runtime_error("operator+: not implemented yet");
 }
 
+BigInt operator* (const BigInt& x, const BigInt& y)
+{
+	BigInt r = BigInt::multAbsNumbers(x, y);
+	if(x.isNegative == y.isNegative or r.mDigits[0] == 0) {
+		r.isNegative = false;
+	} else r.isNegative = true;
+	return r;
+}
+BigInt operator/ (const BigInt& x, const BigInt& y) 
+{
+	BigInt r = BigInt::divAbsNumbers(x,y);
+	if(x.isNegative == y.isNegative or r.mDigits[0] == 0) {
+		r.isNegative = false;
+	} else r.isNegative = true;
+	return r;
+}
+
+BigInt operator*= (BigInt& x, const BigInt& y)
+{
+	x = x * y;
+	return y;
+} 
+
 BigInt operator+= (BigInt& x, const BigInt& y)
 {
 	x = x + y;
@@ -125,16 +172,32 @@ const BigInt operator--(BigInt& x, int)
 {
 	BigInt z = x;
 	--x;
-	return BigInt(z);
+	return z;
+}
+
+BigInt operator+(BigInt& x)
+{
+	return x;
+}
+BigInt operator-(BigInt& x)
+{
+	if(x.isNegative or x.mDigits[0] == 0) x.isNegative = false;
+	else x.isNegative = true;
+	return x;
 }
 bool operator== (const BigInt& x, const BigInt& y)
 {
 	BigInt r = x - y;
 	if(r.toStr() == "0") return true;
 	else return false;
-
-
 }
+bool operator!= (const BigInt& x, const BigInt& y)
+{
+	BigInt r = x - y;
+	if(r.toStr() == "0") return false;
+	else return true;
+}
+
 bool operator> (const BigInt& x, const BigInt& y) 
 {
 	BigInt r = x - y;
@@ -147,8 +210,18 @@ bool operator< (const BigInt& x, const BigInt& y)
 	if(r.toStr() != "0" and r.isNegative) return true;
 	else return false;
 }
-
-
+bool operator>= (const BigInt& x, const BigInt& y)
+{
+	BigInt r = x - y;
+	if(r.toStr() == "0" or !(r.isNegative)) return true;
+	else return false;
+}
+bool operator<= (const BigInt& x, const BigInt& y)
+{
+	BigInt r = x - y;
+	if(r.toStr() == "0" or r.isNegative) return true;
+	else return false;
+}
 
 BigInt BigInt::substrNumbers(const BigInt& x, const BigInt& y) 
 {
@@ -228,10 +301,67 @@ BigInt BigInt::addAbsNumbers(const BigInt& x, const BigInt& y)
 	} else {
 	    r.mDigits.erase(r.mDigits.begin());
 	}
+	  
 	  return r;
+}
 
+BigInt BigInt::multAbsNumbers(const BigInt& x, const BigInt& y)
+{
+	BigInt r;
+ 	if(x.mDigits.size() == 1 or y.mDigits.size() == 1) 
+	 r.mDigits.resize(max(x.mDigits.size(), y.mDigits.size()) + 1, 0);
+  	else r.mDigits.resize(x.mDigits.size() + y.mDigits.size(), 0);
+	
+	size_t i = x.mDigits.size() - 1;
+	size_t j = y.mDigits.size() - 1;
+	size_t k = r.mDigits.size() - 1;
+
+	vector<int> temp1 = x.mDigits;
+	vector<int> temp2 = y.mDigits;
+	int c = 0; 
+	int s = 0;
+	size_t t1 = i;
+	size_t t2 = j;
+	if(!(BigInt::isBigger(x, y))){
+		temp1 = y.mDigits;
+		temp2 = x.mDigits;
+		t1 = j;
+		t2 = i;
+	}
+	size_t q = 1;
+	size_t h = t1;
+	
+	while(t2 != MaxSizeT) {
+		h = t1;
+		while(h != MaxSizeT) {
+		c = temp1[h] * temp2[t2] + s;  
+		r.mDigits[k] += c % 10;
+		if(r.mDigits[k] > 9) {
+			r.mDigits[k - 1] += r.mDigits[k] / 10; 
+			r.mDigits[k] %= 10;
+		}
+		h--;
+		s = c / 10;
+		k--;
+		}
+		if(h == MaxSizeT) {
+			if(s > 0) r.mDigits[k] += s;
+		}
+		t2--;
+		s = 0;
+		++q;  
+		k = r.mDigits.size() - q;
+		
+	}
+	r.eraseleadingZeroes();
+	return r;
+}
+BigInt BigInt::divAbsNumbers(const BigInt& x, const BigInt& y)
+{
+	
 
 }
+
 bool BigInt::isBigger(const BigInt& x, const BigInt& y) {
 	if(x.mDigits.size() > y.mDigits.size()) {
 		return true;
@@ -250,3 +380,8 @@ bool BigInt::isBigger(const BigInt& x, const BigInt& y) {
 	return false;
 
 }
+/*BigInt BigInt::abs(BigInt& x)
+{
+	x.isNegative = false;
+	return x;
+}*/
