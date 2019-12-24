@@ -156,7 +156,7 @@ BigInt operator* (const BigInt& x, const BigInt& y)
 BigInt operator*= (BigInt& x, const BigInt& y)
 {
 	x = x * y;
-	return y;
+	return x;
 } 
 
 BigInt operator+= (BigInt& x, const BigInt& y)
