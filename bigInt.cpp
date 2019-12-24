@@ -70,16 +70,32 @@ string BigInt::toStr() const
 }
 
 void BigInt::eraseleadingZeroes(){
-	size_t i = 0; 
-	while(i + 1 < mDigits.size() and mDigits[0] == 0)
+	while(1 < mDigits.size() and mDigits[0] == 0)
 	{
 		mDigits.erase(mDigits.begin());
 	}
 }
-/*istream& operator >> (istream& in,  BigInt& x)
+istream& operator>> (istream& in,  BigInt& x)
 {
-		
-}*/
+	string a;
+	int o;
+	if(in >> a) {
+		x = BigInt(a);
+		return in;
+	}
+	if(in >> o) {
+		x = BigInt(0);
+		return in;
+	}
+	throw runtime_error("operator>>: not implemented yet");
+			
+}
+
+ostream& operator<< (ostream& outp,const BigInt& x)
+{
+	return outp << x.toStr();			
+}
+
 BigInt operator+ (const BigInt& x, const BigInt& y)
 {
 	if(x.isNegative == y.isNegative) {
@@ -100,12 +116,7 @@ BigInt operator+ (const BigInt& x, const BigInt& y)
 
 }
 BigInt operator- (const BigInt& x, const BigInt& y)
-{// -5 - -3
-	//-3 - -5
-	// 5 - 3 
-	// 3 - 5
-
-
+{
 	if(x.isNegative == y.isNegative) {
 		BigInt r = BigInt::substrNumbers(x, y);
 		if(x.isNegative) {
@@ -133,14 +144,14 @@ BigInt operator* (const BigInt& x, const BigInt& y)
 	} else r.isNegative = true;
 	return r;
 }
-BigInt operator/ (const BigInt& x, const BigInt& y) 
+/*BigInt operator/ (const BigInt& x, const BigInt& y) 
 {
 	BigInt r = BigInt::divAbsNumbers(x,y);
 	if(x.isNegative == y.isNegative or r.mDigits[0] == 0) {
 		r.isNegative = false;
 	} else r.isNegative = true;
 	return r;
-}
+}*/
 
 BigInt operator*= (BigInt& x, const BigInt& y)
 {
@@ -172,6 +183,12 @@ const BigInt operator--(BigInt& x, int)
 {
 	BigInt z = x;
 	--x;
+	return z;
+}
+const BigInt operator++(BigInt&x, int) 
+{
+	BigInt z = x;
+	++x;
 	return z;
 }
 
@@ -306,7 +323,7 @@ BigInt BigInt::addAbsNumbers(const BigInt& x, const BigInt& y)
 }
 
 BigInt BigInt::multAbsNumbers(const BigInt& x, const BigInt& y)
-{
+{	
 	BigInt r;
  	if(x.mDigits.size() == 1 or y.mDigits.size() == 1) 
 	 r.mDigits.resize(max(x.mDigits.size(), y.mDigits.size()) + 1, 0);
@@ -356,12 +373,12 @@ BigInt BigInt::multAbsNumbers(const BigInt& x, const BigInt& y)
 	r.eraseleadingZeroes();
 	return r;
 }
-BigInt BigInt::divAbsNumbers(const BigInt& x, const BigInt& y)
+/*BigInt BigInt::divAbsNumbers(const BigInt& x, const BigInt& y)
 {
 	
 
 }
-
+*/
 bool BigInt::isBigger(const BigInt& x, const BigInt& y) {
 	if(x.mDigits.size() > y.mDigits.size()) {
 		return true;
@@ -380,8 +397,8 @@ bool BigInt::isBigger(const BigInt& x, const BigInt& y) {
 	return false;
 
 }
-/*BigInt BigInt::abs(BigInt& x)
+BigInt BigInt::abs(BigInt& x)
 {
 	x.isNegative = false;
 	return x;
-}*/
+}

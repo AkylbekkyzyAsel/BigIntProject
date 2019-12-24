@@ -4,7 +4,7 @@
 
 using namespace std;
 
-/*TEST_CASE("constructors") 
+TEST_CASE("constructors") 
 {
 	//test driven development
 	SECTION("no-args ctor") 
@@ -57,7 +57,7 @@ TEST_CASE("operator+")
 		}
 		
 }	
-	
+
 TEST_CASE("operator-")
 {
 		for(int i = 1000; i > -1000; i--) {
@@ -175,22 +175,37 @@ TEST_CASE("operator++")
 				REQUIRE(a.toStr() == to_string(++i));
 		}
 }
+TEST_CASE("operator--(int)") 
+{
+
+		
+		for(int i = 1000; i > -1000; i--) {
+			BigInt x = to_string(i);
+			BigInt y = to_string(10);
+			REQUIRE((x--).toStr() == to_string(i--));
+		}
+		
+		
+}
+
 TEST_CASE("operator++(int)") 
 {
 
 		///DOES NOT WORK YET!!
+		for(int i = -1000; i < 1000; i++) {
+			BigInt x = to_string(i);
+			BigInt y = to_string(10);
+			REQUIRE((x++).toStr() == to_string(i++));
+		}
 		
-		int i = 10;
-		BigInt x = to_string(i);
-		BigInt y = to_string(10);
-		x--;
-		REQUIRE(x.toStr() == to_string(i--));
+		
 }
+
 TEST_CASE("fuction abs") {
 		//DOES NOT WORK
 		for(int i = 1000; i > -1000; i--){
 				BigInt a = to_string(i);
-				BigInt b = abs(a);
+				BigInt b = BigInt::abs(a);
 				REQUIRE(b.toStr() == to_string(abs(i)));
 		}
 		
@@ -245,19 +260,24 @@ TEST_CASE("unary operator-")
 		REQUIRE(b.toStr() == to_string(-i));
 	}
 }
-TEST_CASE("input")
+
+
+TEST_CASE("output")
+{
+	BigInt r("111111111111111111111111");
+	cout << r;
+}
+
+
+
+/*TEST_CASE("input and output") {
+	BigInt a, b;
+	cin >> a >> b;
+	cout << a * b;
+}*/
+/*TEST_CASE("input")
 {
 	BigInt r;
 	cin >> r;
 	REQUIRE(r.toStr() == to_string(20));
 }*/
-TEST_CASE("operator/")
-{
-	BigInt a = to_string(7896);
-	BigInt b = to_string(13);
-	BigInt z = a / b;
-	REQUIRE(z.toStr() == to_string(7896 / 13));
-}
-
-
-
